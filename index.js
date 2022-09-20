@@ -11,20 +11,22 @@ const args = process.argv.slice(2);
 
 let skusForCountry = (countrySkuCode) => {
   return {
-    [`MKGR3${countrySkuCode}/A`]: `14" M1 Pro 8 Core CPU 14 Core GPU 512GB Silver`,
-    [`MKGP3${countrySkuCode}/A`]: '14" M1 Pro 8 Core CPU 14 Core GPU 512GB Space Grey',
-    [`MKGT3${countrySkuCode}/A`]: '14" M1 Pro 10 Core CPU 16 Core GPU 1TB Silver',
-    [`MKGQ3${countrySkuCode}/A`]: '14" M1 Pro 10 Core CPU 16 Core GPU 1TB Space Grey',
-    [`MMQX3${countrySkuCode}/A`]: '14" M1 Max 10 Core CPU 32 Core GPU 2TB Silver, Ultimate',
-    [`MKH53${countrySkuCode}/A`]: '14" M1 Max 10 Core CPU 32 Core GPU 2TB Space Grey, Ultimate',
-    [`MK1H3${countrySkuCode}/A`]: '16" M1 Max 10 Core CPU 32 Core GPU 1TB Silver',
-    [`MK1A3${countrySkuCode}/A`]: '16" M1 Max 10 Core CPU 32 Core GPU 1TB Space Grey',
-    [`MMQW3${countrySkuCode}/A`]: '16" M1 Max 10 Core CPU 32 Core GPU 4TB Silver, Ultimate',
-    [`MK233${countrySkuCode}/A`]: '16" M1 Max 10 Core CPU 32 Core GPU 4TB Space Grey, Ultimate',
-    [`MK1F3${countrySkuCode}/A`]: '16" M1 Pro 10 Core CPU 16 Core GPU 1TB Silver',
-    [`MK193${countrySkuCode}/A`]: '16" M1 Pro 10 Core CPU 16 Core GPU 1TB Space Grey',
-    [`MK1E3${countrySkuCode}/A`]: '16" M1 Pro 10 Core CPU 16 Core GPU 512GB Silver',
-    [`MK183${countrySkuCode}/A`]: '16" M1 Pro 10 Core CPU 16 Core GPU 512GB Space Grey',
+    [`MQ993VC/A`]: 'IPhone 14 Pro Max 128GB Deep Purple',
+    [`MQ9E3VC/A`]: 'IPhone 14 Pro Max 256GB Deep Purple',
+    [`MQ9J3VC/A`]: 'IPhone 14 Pro Max 512GB Deep Purple',
+    [`MQ9N3VC/A`]: 'IPhone 14 Pro Max 1TB Deep Purple',
+    [`MQ983VC/A`]: 'IPhone 14 Pro Max 128GB Gold',
+    [`MQ9D3VC/A`]: 'IPhone 14 Pro Max 256GB Gold',
+    [`MQ9H3VC/A`]: 'IPhone 14 Pro Max 512GB Gold',
+    [`MQ9M3VC/A`]: 'IPhone 14 Pro Max 1TB Gold',
+    [`MQ973VC/A`]: 'IPhone 14 Pro Max 128GB Silver',
+    [`MQ9C3VC/A`]: 'IPhone 14 Pro Max 256GB Silver',
+    [`MQ9G3VC/A`]: 'IPhone 14 Pro Max 512GB Silver',
+    [`MQ9L3VC/A`]: 'IPhone 14 Pro Max 1TB Silver',
+    [`MQ963VC/A`]: 'IPhone 14 Pro Max 128GB Space Black',
+    [`MQ9A3VC/A`]: 'IPhone 14 Pro Max 256GB Space Black',
+    [`MQ9F3VC/A`]: 'IPhone 14 Pro Max 512GB Space Black',
+    [`MQ9K3VC/A`]: 'IPhone 14 Pro Max 1TB Space Black',
   }
 }
 
@@ -63,6 +65,8 @@ const query =
     .map((k, i) => `parts.${i}=${encodeURIComponent(k)}`)
     .join("&") + `&searchNearby=true&store=${storeNumber}`;
 
+//console.log(query)
+
 let options = {
   method: "GET",
   url: `https://www.apple.com${storePath}/shop/fulfillment-messages?` + query,
@@ -81,12 +85,14 @@ request(options, function (error, response) {
   const statusArray = storesArray
     .flatMap((store) => {
       if (state && state !== store.state) return null;
+      //console.log(store)
 
       const name = store.storeName;
       let productStatus = [];
 
       for (const [key, value] of Object.entries(skuList)) {
         const product = store.partsAvailability[key];
+        //console.log(product)
 
         hasStoreSearchError = product.storeSearchEnabled !== true;
 
