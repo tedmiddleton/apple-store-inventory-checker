@@ -192,7 +192,7 @@ request(options, function (error, response) {
     dt = new Date()
     minutes = dt.getMinutes()
     // Once an hour
-    if (minutes < 9) {
+    if (minutes < process.env.NO_MATCH_MINUTES) {
 
       statusArrayStr = JSON.stringify(statusArray, null, 2)
       email = `${statusArrayStr}\n${notificationMessage}`
