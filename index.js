@@ -12,6 +12,9 @@ const args = process.argv.slice(2);
 
 let skusForCountry = (countrySkuCode) => {
   return {
+    //[`MKGR3LL/A`]: `14" M1 Pro 8 Core CPU 14 Core GPU 512GB Silver`,
+    //[`MKGP3LL/A`]: '14" M1 Pro 8 Core CPU 14 Core GPU 512GB Space Grey',
+    //[`MKGT3LL/A`]: '14" M1 Pro 10 Core CPU 16 Core GPU 1TB Silver',
     [`MQ993VC/A`]: 'IPhone 14 Pro Max 128GB Deep Purple',
     [`MQ9E3VC/A`]: 'IPhone 14 Pro Max 256GB Deep Purple',
     [`MQ9J3VC/A`]: 'IPhone 14 Pro Max 512GB Deep Purple',
@@ -33,10 +36,9 @@ let skusForCountry = (countrySkuCode) => {
 
 let favouritesForCountry = (countrySkuCode) => {
   return [
-    `MMQX3${countrySkuCode}/A`,
-    `MKH53${countrySkuCode}/A`,
-    `MK1A3${countrySkuCode}/A`,
-    `MK1H3${countrySkuCode}/A`,
+    `MQ983VC/A`,
+    `MQ9D3VC/A`,
+    `MQ9H3VC/A`,
   ]
 }
 
@@ -47,7 +49,7 @@ let country = "CA"
 
 if (args.length > 0) {
   const passedStore = args[0];
-  country = (args[1] ? args[1] : "US").toUpperCase();
+  country = (args[1] ? args[1] : "CA").toUpperCase();
   if (passedStore.charAt(0) === "R") {
     // All retail store numbers start with R
     storeNumber = passedStore;
@@ -73,6 +75,14 @@ let options = {
   url: `https://www.apple.com${storePath}/shop/fulfillment-messages?` + query,
 };
 
+var mailtransport = nodemailer.createTransport({
+    service: "hotmail",
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+    }
+});
+
 request(options, function (error, response) {
   if (error) throw new Error(error);
 
@@ -86,7 +96,7 @@ request(options, function (error, response) {
   const statusArray = storesArray
     .flatMap((store) => {
       if (state && state !== store.state) return null;
-      console.log(store)
+      //console.log(store)
 
       const name = store.storeName;
       let productStatus = [];
@@ -135,10 +145,74 @@ request(options, function (error, response) {
   if (inventory) {
     notificationMessage = `${hasUltimate ? "FOUND ULTIMATE! " : ""
       }Some models found: ${inventory}`;
-  } else {
+
+    // First an email...
+    var mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_TARGET_USER,
+      subject: 'Iphone models found',
+      text: notificationMessage
+    };
+
+    mailtransport.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+
+    // We have to wait a sec
+    setTimeout(() => {
+
+      var mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: process.env.SMS_TARGET_USER,
+        subject: 'Iphone models found',
+        text: notificationMessage
+      };
+    
+      // Then, a text message
+      mailtransport.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+
+    }, 1000);
+
+  } 
+  else {
     notificationMessage = "No models found.";
     console.log(statusArray);
     console.log(notificationMessage);
+
+    dt = new Date()
+    minutes = dt.getMinutes()
+    // Once an hour
+    if (minutes < 9) {
+
+      statusArrayStr = JSON.stringify(statusArray, null, 2)
+      email = `${statusArrayStr}\n${notificationMessage}`
+      console.log(email)
+      var mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_TARGET_USER,
+        subject: 'Iphone models not found',
+        text: email
+      };
+
+      mailtransport.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+    }
+
   }
 
   const message = hasError ? "Possible error?" : notificationMessage;
