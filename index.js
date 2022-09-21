@@ -2,6 +2,7 @@ const request = require("request");
 const notifier = require("node-notifier");
 const flatMap = require('array.prototype.flatmap');
 const replaceAll = require("string.prototype.replaceall");
+const nodemailer = require('nodemailer');
 
 flatMap.shim();
 replaceAll.shim();
@@ -40,9 +41,9 @@ let favouritesForCountry = (countrySkuCode) => {
 }
 
 const control = "MYD92LL/A";
-let storeNumber = "R172";
-let state = "CO";
-let country = "US"
+let storeNumber = "R488";
+let state = "BC";
+let country = "CA"
 
 if (args.length > 0) {
   const passedStore = args[0];
@@ -85,7 +86,7 @@ request(options, function (error, response) {
   const statusArray = storesArray
     .flatMap((store) => {
       if (state && state !== store.state) return null;
-      //console.log(store)
+      console.log(store)
 
       const name = store.storeName;
       let productStatus = [];
